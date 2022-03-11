@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "mapa-streamlit"
+version = "0.1.0"
+description = ""
+authors = ["Fabian Gebhart"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+streamlit = "^1.7.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
