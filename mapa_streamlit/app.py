@@ -15,17 +15,20 @@ ZOOM = 3
 Z_OFFSET = 2
 Z_SCALE = 1.5
 AREA_THRESHOLD = 30.0
+BTN_LABEL_CREATE_STL = "Create STL"
+BTN_LABEL_DOWNLOAD_STL = "Download STL"
 ABOUT = """
 # mapa 🌍
 Hi my name is Fabian Gebhart :wave: and I am the author of mapa. mapa let's you create 3D-printable STL files
-from every region around the globe. If you want to reach out, follow me or report a bug, you can do so via
+from every region around the globe. The elevation data is retrieved from
+[ALOS DEM hosted by MS Planetary Computer](https://planetarycomputer.microsoft.com/dataset/alos-dem), which provides
+satellite data with 30m resolution.
+If you want to reach out, follow me or report a bug, you can do so via
 [Github](https://github.com/fgebhart) or [Twitter](https://twitter.com/FabianGebhart).
 For more details please refer to:
 * the [mapa-streamlit repo](https://github.com/fgebhart/mapa-streamlit) which contains the source code of this streamlit app or
 * the original [mapa repo](https://github.com/fgebhart/mapa) which contains the source code of the [mapa python package](https://pypi.org/project/mapa/)
 """
-BTN_LABEL_CREATE_STL = "Create STL"
-BTN_LABEL_DOWNLOAD_STL = "Download STL"
 
 def _show_map(center: List[float], zoom: int) -> folium.Map:
     m = folium.Map(
@@ -52,7 +55,6 @@ def _show_map(center: List[float], zoom: int) -> folium.Map:
 
 def _selected_region_below_threshold(geometry):
     area = Polygon(geometry["coordinates"][0]).area
-    print(area)
     return area < AREA_THRESHOLD
 
 
@@ -63,7 +65,6 @@ def _compute_stl(folium_output: dict):
     else:
         geometry = folium_output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
-        print(f"hash of geojson: {geo_hash}")
         if _selected_region_below_threshold(geometry):
             path = Path(__file__).parent / f"{geo_hash}.stl"
             convert_bbox_to_stl(
