@@ -24,7 +24,8 @@ For more details please refer to:
 * the [mapa-streamlit repo](https://github.com/fgebhart/mapa-streamlit) which contains the source code of this streamlit app or
 * the original [mapa repo](https://github.com/fgebhart/mapa) which contains the source code of the [mapa python package](https://pypi.org/project/mapa/)
 """
-
+BTN_LABEL_CREATE_STL = "Create STL"
+BTN_LABEL_DOWNLOAD_STL = "Download STL"
 
 def _show_map(center: List[float], zoom: int) -> folium.Map:
     m = folium.Map(
@@ -71,7 +72,8 @@ def _compute_stl(folium_output: dict):
                 z_offset=Z_OFFSET if z_offset is None else z_offset,
                 output_file=path,
             )
-            st.success("Successfully computed STL file!")
+            # it is important to spawn this success message in the sidebar, because state will get lost otherwise
+            st.sidebar.success("Successfully computed STL file!")
         else:
             st.warning(
                 "‼️ Selected region is too large, fetching data for this area would consume too many resources. "
@@ -83,7 +85,7 @@ def _compute_stl(folium_output: dict):
 st.set_page_config(
     page_title="mapa streamlit",
     page_icon="🌍",
-    # layout="wide",
+    layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
         "Get Help": "https://github.com/fgebhart/mapa-streamlit",
@@ -101,7 +103,7 @@ st.markdown(
 )
 st.write("\n")
 m = _show_map(center=CENTER, zoom=ZOOM)
-output = st_folium(m, key="init", width=900, height=600)
+output = st_folium(m, key="init", width=1000, height=600)
 
 
 geo_hash = None
@@ -110,19 +112,19 @@ if output:
         geometry = output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
 
-st.sidebar.write(
-    """
+st.sidebar.markdown(
+    f"""
     # Getting Started
-
     1. Click the black square on the map
     2. Draw a rectangle over your region of intereset
-    3. Click on "Create 3D Model"
-    """
+    3. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
+    """,
+    unsafe_allow_html=True
 )
 
 st.sidebar.button(
-    "Create STL",
-    key="create_3d_model",
+    BTN_LABEL_CREATE_STL,
+    key="create_stl",
     help=None,
     on_click=_compute_stl,
     args=None,
@@ -132,17 +134,18 @@ st.sidebar.button(
     disabled=False if geo_hash else True,
 )
 
-st.sidebar.write(
-    """
+st.sidebar.markdown(
+    f"""
     4. Wait for the computation to finish
-    5. Click on "Download STL"
-    """
+    5. Click on <kbd>{BTN_LABEL_DOWNLOAD_STL}</kbd>
+    """,
+    unsafe_allow_html=True
 )
 
 
 def _download_btn(data, disabled):
     st.sidebar.download_button(
-        label="Download STL",
+        label=BTN_LABEL_DOWNLOAD_STL,
         data=data,
         file_name=f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_mapa-streamlit.stl',
         disabled=disabled,
@@ -167,5 +170,5 @@ st.sidebar.write(
 )
 z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, 2)
 z_scale = st.sidebar.slider(
-    "z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, 1.0
+    "z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, 2.0
 )
