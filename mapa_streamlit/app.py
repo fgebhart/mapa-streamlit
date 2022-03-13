@@ -9,9 +9,19 @@ from mapa import convert_bbox_to_stl
 from mapa.caching import get_hash_of_geojson
 
 
-CENTER = [40.5566, 23.4660]
-ZOOM = 4
-
+CENTER = [25., 55.]
+ZOOM = 3
+Z_OFFSET = 2
+Z_SCALE = 1.5
+ABOUT = """
+# mapa 🌍
+Hi my name is Fabian Gebhart :wave: and I am the author of mapa. mapa let's you create 3D-printable STL files
+from every region around the globe. If you want to reach out, follow me or report a bug, you can do so via
+[Github](https://github.com/fgebhart) or [Twitter](https://twitter.com/FabianGebhart).
+For more details please refer to:
+* the [mapa-streamlit repo](https://github.com/fgebhart/mapa-streamlit) which contains the source code of this streamlit app or
+* the original [mapa repo](https://github.com/fgebhart/mapa) which contains the source code of the [mapa python package](https://pypi.org/project/mapa/)
+"""
 
 def _show_map(center: List[float], zoom: int) -> folium.Map:
     m = folium.Map(
@@ -43,23 +53,40 @@ def _compute_stl(folium_output: dict):
         geometry = folium_output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
         print(f"hash of geojson: {geo_hash}")
-        # with st.spinner("Computing STL file... Please wait... "):
         # TODO check that area of geometry is smaller than ......
         path = Path(__file__).parent / f"{geo_hash}.stl"
-        convert_bbox_to_stl(geometry, output_file=path)
-        st.sidebar.success("Finished computing STL file! 🎈")
+        convert_bbox_to_stl(
+            bbox_geometry=geometry,
+            z_scale=Z_SCALE if z_scale is None else z_scale,
+            z_offset=Z_OFFSET if z_offset is None else z_offset,
+            output_file=path,
+        )
+        st.sidebar.success("Successfully computed STL file!")
 
 
 # run app
+st.set_page_config(
+    page_title="mapa streamlit",
+    page_icon="🌍",
+    # layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        "Get Help": "https://github.com/fgebhart/mapa-streamlit",
+        "Report a bug": "https://github.com/fgebhart/mapa-streamlit/issues",
+        "About": ABOUT
+        
+    },
+)
+
 st.write(
     """
     # mapa 🌍 - Map to STL Converter
-    Create and download 3D-printable STL files from around the globe.
+    Follow the instructions in the sidebar on the left to create and download a 3D-printable STL file.
     """
 )
 st.write("\n")
 m = _show_map(center=CENTER, zoom=ZOOM)
-output = st_folium(m, key="init", width=800, height=600)
+output = st_folium(m, key="init", width=900, height=600)
 
 
 geo_hash = None
@@ -116,3 +143,12 @@ if geo_hash:
         _download_btn(b"None", True)
 else:
     _download_btn(b"None", True)
+
+st.sidebar.write(
+    """
+    # Customization
+    Use below options to customize the output STL file:
+    """
+)
+z_offset = st.sidebar.slider('z-offset (in millimeter):', 0, 20, 2)
+z_scale = st.sidebar.slider('z-scale (factor to be multiplied to the z-axis):', 0.0, 5.0, 1.0)
