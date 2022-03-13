@@ -30,6 +30,7 @@ For more details please refer to:
 * the original [mapa repo](https://github.com/fgebhart/mapa) which contains the source code of the [mapa python package](https://pypi.org/project/mapa/)
 """
 
+
 def _show_map(center: List[float], zoom: int) -> folium.Map:
     m = folium.Map(
         location=center,
@@ -89,8 +90,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        "Get Help": "https://github.com/fgebhart/mapa-streamlit",
-        "Report a bug": "https://github.com/fgebhart/mapa-streamlit/issues",
         "About": ABOUT,
     },
 )
@@ -120,7 +119,7 @@ st.sidebar.markdown(
     2. Draw a rectangle over your region of intereset (The larger the region the longer the STL file creation takes ☝️)
     3. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 st.sidebar.button(
@@ -140,7 +139,7 @@ st.sidebar.markdown(
     4. Wait for the computation to finish
     5. Click on <kbd>{BTN_LABEL_DOWNLOAD_STL}</kbd>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 
