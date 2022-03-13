@@ -117,7 +117,7 @@ st.sidebar.markdown(
     f"""
     # Getting Started
     1. Click the black square on the map
-    2. Draw a rectangle over your region of intereset
+    2. Draw a rectangle over your region of intereset (The larger the region the longer the STL file creation takes ☝️)
     3. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
     """,
     unsafe_allow_html=True
