@@ -7,12 +7,14 @@ from folium.plugins import Draw
 from streamlit_folium import st_folium
 from mapa import convert_bbox_to_stl
 from mapa.caching import get_hash_of_geojson
+from shapely.geometry import Polygon
 
 
-CENTER = [25., 55.]
+CENTER = [25.0, 55.0]
 ZOOM = 3
 Z_OFFSET = 2
 Z_SCALE = 1.5
+AREA_THRESHOLD = 30.0
 ABOUT = """
 # mapa 🌍
 Hi my name is Fabian Gebhart :wave: and I am the author of mapa. mapa let's you create 3D-printable STL files
@@ -22,6 +24,7 @@ For more details please refer to:
 * the [mapa-streamlit repo](https://github.com/fgebhart/mapa-streamlit) which contains the source code of this streamlit app or
 * the original [mapa repo](https://github.com/fgebhart/mapa) which contains the source code of the [mapa python package](https://pypi.org/project/mapa/)
 """
+
 
 def _show_map(center: List[float], zoom: int) -> folium.Map:
     m = folium.Map(
@@ -46,22 +49,34 @@ def _show_map(center: List[float], zoom: int) -> folium.Map:
     return m
 
 
+def _selected_region_below_threshold(geometry):
+    area = Polygon(geometry["coordinates"][0]).area
+    print(area)
+    return area < AREA_THRESHOLD
+
+
 def _compute_stl(folium_output: dict):
     if folium_output["last_active_drawing"] is None:
-        st.sidebar.error("You need to draw a rectangle on the map first!")
+        # this line should never be reached, since the button is deactivated in the given if clause
+        st.warning("You need to draw a rectangle on the map first!")
     else:
         geometry = folium_output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
         print(f"hash of geojson: {geo_hash}")
-        # TODO check that area of geometry is smaller than ......
-        path = Path(__file__).parent / f"{geo_hash}.stl"
-        convert_bbox_to_stl(
-            bbox_geometry=geometry,
-            z_scale=Z_SCALE if z_scale is None else z_scale,
-            z_offset=Z_OFFSET if z_offset is None else z_offset,
-            output_file=path,
-        )
-        st.sidebar.success("Successfully computed STL file!")
+        if _selected_region_below_threshold(geometry):
+            path = Path(__file__).parent / f"{geo_hash}.stl"
+            convert_bbox_to_stl(
+                bbox_geometry=geometry,
+                z_scale=Z_SCALE if z_scale is None else z_scale,
+                z_offset=Z_OFFSET if z_offset is None else z_offset,
+                output_file=path,
+            )
+            st.success("Successfully computed STL file!")
+        else:
+            st.warning(
+                "‼️ Selected region is too large, fetching data for this area would consume too many resources. "
+                "Please select a smaller region. ‼️"
+            )
 
 
 # run app
@@ -73,16 +88,16 @@ st.set_page_config(
     menu_items={
         "Get Help": "https://github.com/fgebhart/mapa-streamlit",
         "Report a bug": "https://github.com/fgebhart/mapa-streamlit/issues",
-        "About": ABOUT
-        
+        "About": ABOUT,
     },
 )
 
-st.write(
+st.markdown(
     """
-    # mapa 🌍 - Map to STL Converter
+    # mapa &nbsp; 🌍 &nbsp; Map to STL Converter
     Follow the instructions in the sidebar on the left to create and download a 3D-printable STL file.
-    """
+    """,
+    unsafe_allow_html=True,
 )
 st.write("\n")
 m = _show_map(center=CENTER, zoom=ZOOM)
@@ -150,5 +165,7 @@ st.sidebar.write(
     Use below options to customize the output STL file:
     """
 )
-z_offset = st.sidebar.slider('z-offset (in millimeter):', 0, 20, 2)
-z_scale = st.sidebar.slider('z-scale (factor to be multiplied to the z-axis):', 0.0, 5.0, 1.0)
+z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, 2)
+z_scale = st.sidebar.slider(
+    "z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, 1.0
+)
