@@ -5,16 +5,28 @@ description = ""
 authors = ["Fabian Gebhart"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.8,<3.9"   # TODO: set back to <3.11
 streamlit = "^1.7.0"
 streamlit-folium = "^0.6.2"
 mapa = "^0.5.0"
 Shapely = "^1.8.1"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
-black = {version = "^22.1.0", allow-prereleases = true}
+pytest = "^7.0.0"
+flake8 = "^4.0.1"
+black = "^22.1.0"
+isort = "^5.10.1"
+pre-commit = "^2.17.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+target_version = ["py38"]
+line-length = 121
+
+[tool.isort]
+multi_line_output = 3
+line_length = 121
+include_trailing_comma = true

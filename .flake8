@@ -1,0 +1,11 @@
+[flake8]
+; ignore = D203, E203, W503, W293, P101
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    .eggs,
+max-line-length = 121
+per-file-ignores =
+    mapa_streamlit/app.py:E501

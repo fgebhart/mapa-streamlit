@@ -1,5 +1,4 @@
 import datetime
-from pathlib import Path
 from typing import List
 
 import folium
@@ -83,6 +82,7 @@ def _compute_stl(folium_output: dict):
                 "Please select a smaller region. ‼️"
             )
 
+
 def _download_btn(data, disabled):
     st.sidebar.download_button(
         label=BTN_LABEL_DOWNLOAD_STL,
@@ -163,6 +163,4 @@ st.sidebar.write(
     """
 )
 z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, Z_OFFSET)
-z_scale = st.sidebar.slider(
-    "z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE
-)
+z_scale = st.sidebar.slider("z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE)
