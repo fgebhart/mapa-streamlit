@@ -69,7 +69,7 @@ def _compute_stl(folium_output: dict):
         # this line should never be reached, since the button is deactivated in the given if clause
         st.warning("You need to draw a rectangle on the map first!")
     else:
-        _cleanup_of_old_stl_files(older_than_n_days=10)
+        _cleanup_of_old_stl_files(older_than_n_days=3)
         geometry = folium_output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
         if _selected_region_below_threshold(geometry):
@@ -110,75 +110,75 @@ def _cleanup_of_old_stl_files(path: Path = TMPDIR(), older_than_n_days: int = 10
                 log.info(f"file not older than {older_than_n_days} days, won't delete it: {file}")
 
 
-# run app
-st.set_page_config(
-    page_title="mapa streamlit",
-    page_icon="🌍",
-    layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        "About": ABOUT,
-    },
-)
+if __name__ == "__main__":
+    st.set_page_config(
+        page_title="mapa streamlit",
+        page_icon="🌍",
+        layout="wide",
+        initial_sidebar_state="expanded",
+        menu_items={
+            "About": ABOUT,
+        },
+    )
 
-st.markdown(
-    """
-    # mapa &nbsp; 🌍 &nbsp; Map to STL Converter
-    Follow the instructions in the sidebar on the left to create and download a 3D-printable STL file.
-    """,
-    unsafe_allow_html=True,
-)
-st.write("\n")
-m = _show_map(center=CENTER, zoom=ZOOM)
-output = st_folium(m, key="init", width=1000, height=600)
+    st.markdown(
+        """
+        # mapa &nbsp; 🌍 &nbsp; Map to STL Converter
+        Follow the instructions in the sidebar on the left to create and download a 3D-printable STL file.
+        """,
+        unsafe_allow_html=True,
+    )
+    st.write("\n")
+    m = _show_map(center=CENTER, zoom=ZOOM)
+    output = st_folium(m, key="init", width=1000, height=600)
 
-geo_hash = None
-if output:
-    if output["last_active_drawing"] is not None:
-        geometry = output["last_active_drawing"]["geometry"]
-        geo_hash = get_hash_of_geojson(geometry)
+    geo_hash = None
+    if output:
+        if output["last_active_drawing"] is not None:
+            geometry = output["last_active_drawing"]["geometry"]
+            geo_hash = get_hash_of_geojson(geometry)
 
-st.sidebar.markdown(
-    f"""
-    # Getting Started
-    1. Click the black square on the map
-    2. Draw a rectangle over your region of intereset (The larger the region the longer the STL file creation takes ☝️)
-    3. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
-    """,
-    unsafe_allow_html=True,
-)
+    st.sidebar.markdown(
+        f"""
+        # Getting Started
+        1. Click the black square on the map
+        2. Draw a rectangle over your region of intereset (The larger the region the longer the STL file creation takes ☝️)
+        3. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
+        """,
+        unsafe_allow_html=True,
+    )
 
-st.sidebar.button(
-    BTN_LABEL_CREATE_STL,
-    key="create_stl",
-    on_click=_compute_stl,
-    kwargs={"folium_output": output},
-    disabled=False if geo_hash else True,
-)
+    st.sidebar.button(
+        BTN_LABEL_CREATE_STL,
+        key="create_stl",
+        on_click=_compute_stl,
+        kwargs={"folium_output": output},
+        disabled=False if geo_hash else True,
+    )
 
-st.sidebar.markdown(
-    f"""
-    4. Wait for the computation to finish
-    5. Click on <kbd>{BTN_LABEL_DOWNLOAD_STL}</kbd>
-    """,
-    unsafe_allow_html=True,
-)
+    st.sidebar.markdown(
+        f"""
+        4. Wait for the computation to finish
+        5. Click on <kbd>{BTN_LABEL_DOWNLOAD_STL}</kbd>
+        """,
+        unsafe_allow_html=True,
+    )
 
-if geo_hash:
-    path = TMPDIR() / f"{geo_hash}.stl"
-    if path.is_file():
-        with open(path, "rb") as fp:
-            _download_btn(fp, False)
+    if geo_hash:
+        path = TMPDIR() / f"{geo_hash}.stl"
+        if path.is_file():
+            with open(path, "rb") as fp:
+                _download_btn(fp, False)
+        else:
+            _download_btn(b"None", True)
     else:
         _download_btn(b"None", True)
-else:
-    _download_btn(b"None", True)
 
-st.sidebar.write(
-    """
-    # Customization
-    Use below options to customize the output STL file:
-    """
-)
-z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, Z_OFFSET)
-z_scale = st.sidebar.slider("z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE)
+    st.sidebar.write(
+        """
+        # Customization
+        Use below options to customize the output STL file:
+        """
+    )
+    z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, Z_OFFSET)
+    z_scale = st.sidebar.slider("z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE)
