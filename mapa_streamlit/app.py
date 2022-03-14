@@ -7,13 +7,14 @@ import streamlit as st
 from folium.plugins import Draw
 from mapa import convert_bbox_to_stl
 from mapa.caching import get_hash_of_geojson
+from mapa.utils import TMPDIR
 from shapely.geometry import Polygon
 from streamlit_folium import st_folium
 
 CENTER = [25.0, 55.0]
 ZOOM = 3
 Z_OFFSET = 2
-Z_SCALE = 1.5
+Z_SCALE = 2.0
 AREA_THRESHOLD = 30.0
 BTN_LABEL_CREATE_STL = "Create STL"
 BTN_LABEL_DOWNLOAD_STL = "Download STL"
@@ -67,7 +68,7 @@ def _compute_stl(folium_output: dict):
         geometry = folium_output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
         if _selected_region_below_threshold(geometry):
-            path = Path(__file__).parent / f"{geo_hash}.stl"
+            path = TMPDIR() / f"{geo_hash}.stl"
             convert_bbox_to_stl(
                 bbox_geometry=geometry,
                 z_scale=Z_SCALE if z_scale is None else z_scale,
@@ -81,6 +82,14 @@ def _compute_stl(folium_output: dict):
                 "‼️ Selected region is too large, fetching data for this area would consume too many resources. "
                 "Please select a smaller region. ‼️"
             )
+
+def _download_btn(data, disabled):
+    st.sidebar.download_button(
+        label=BTN_LABEL_DOWNLOAD_STL,
+        data=data,
+        file_name=f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_mapa-streamlit.stl',
+        disabled=disabled,
+    )
 
 
 # run app
@@ -105,7 +114,6 @@ st.write("\n")
 m = _show_map(center=CENTER, zoom=ZOOM)
 output = st_folium(m, key="init", width=1000, height=600)
 
-
 geo_hash = None
 if output:
     if output["last_active_drawing"] is not None:
@@ -125,12 +133,8 @@ st.sidebar.markdown(
 st.sidebar.button(
     BTN_LABEL_CREATE_STL,
     key="create_stl",
-    help=None,
     on_click=_compute_stl,
-    args=None,
-    kwargs={
-        "folium_output": output,
-    },
+    kwargs={"folium_output": output},
     disabled=False if geo_hash else True,
 )
 
@@ -142,18 +146,8 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 
-
-def _download_btn(data, disabled):
-    st.sidebar.download_button(
-        label=BTN_LABEL_DOWNLOAD_STL,
-        data=data,
-        file_name=f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_mapa-streamlit.stl',
-        disabled=disabled,
-    )
-
-
 if geo_hash:
-    path = Path(__file__).parent / f"{geo_hash}.stl"
+    path = TMPDIR() / f"{geo_hash}.stl"
     if path.is_file():
         with open(path, "rb") as fp:
             _download_btn(fp, False)
@@ -168,7 +162,7 @@ st.sidebar.write(
     Use below options to customize the output STL file:
     """
 )
-z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, 2)
+z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, Z_OFFSET)
 z_scale = st.sidebar.slider(
-    "z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, 2.0
+    "z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE
 )
