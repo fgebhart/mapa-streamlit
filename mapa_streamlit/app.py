@@ -141,31 +141,31 @@ if __name__ == "__main__":
             geometry = output["last_active_drawing"]["geometry"]
             geo_hash = get_hash_of_geojson(geometry)
 
-    st.sidebar.markdown(
-        f"""
-        # Getting Started
-        1. Click the black square on the map
-        2. Draw a rectangle over your region of intereset (The larger the region the longer the STL file creation takes ☝️)
-        3. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.sidebar.button(
-        BTN_LABEL_CREATE_STL,
-        key="create_stl",
-        on_click=_compute_stl,
-        kwargs={"folium_output": output},
-        disabled=False if geo_hash else True,
-    )
-
-    st.sidebar.markdown(
-        f"""
-        4. Wait for the computation to finish
-        5. Click on <kbd>{BTN_LABEL_DOWNLOAD_STL}</kbd>
-        """,
-        unsafe_allow_html=True,
-    )
+    # Getting Started container
+    with st.container():
+        st.sidebar.markdown(
+            f"""
+            # Getting Started
+            1. Click the black square on the map
+            2. Draw a rectangle over your region of intereset (The larger the region the longer the STL file creation takes ☝️)
+            3. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.sidebar.button(
+            BTN_LABEL_CREATE_STL,
+            key="create_stl",
+            on_click=_compute_stl,
+            kwargs={"folium_output": output},
+            disabled=False if geo_hash else True,
+        )
+        st.sidebar.markdown(
+            f"""
+            4. Wait for the computation to finish
+            5. Click on <kbd>{BTN_LABEL_DOWNLOAD_STL}</kbd>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if geo_hash:
         path = TMPDIR() / f"{geo_hash}.stl"
@@ -177,11 +177,15 @@ if __name__ == "__main__":
     else:
         _download_btn(b"None", True)
 
-    st.sidebar.write(
-        """
-        # Customization
-        Use below options to customize the output STL file:
-        """
-    )
-    z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, Z_OFFSET)
-    z_scale = st.sidebar.slider("z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE)
+    st.sidebar.markdown("""---""")
+
+    # Customization container
+    with st.container():
+        st.sidebar.write(
+            """
+            # Customization
+            Use below options to customize the output STL file:
+            """
+        )
+        z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, Z_OFFSET)
+        z_scale = st.sidebar.slider("z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE)
