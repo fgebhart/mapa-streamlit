@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import sys
 from pathlib import Path
 from typing import List
 
@@ -14,6 +15,8 @@ from shapely.geometry import Polygon
 from streamlit_folium import st_folium
 
 log = logging.getLogger(__name__)
+handler = logging.StreamHandler(sys.stdout)
+log.addHandler(handler)
 
 CENTER = [25.0, 55.0]
 ZOOM = 3
