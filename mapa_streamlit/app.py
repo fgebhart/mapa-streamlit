@@ -1,4 +1,7 @@
 import datetime
+import logging
+import os
+from pathlib import Path
 from typing import List
 
 import folium
@@ -9,6 +12,8 @@ from mapa.caching import get_hash_of_geojson
 from mapa.utils import TMPDIR
 from shapely.geometry import Polygon
 from streamlit_folium import st_folium
+
+log = logging.getLogger(__name__)
 
 CENTER = [25.0, 55.0]
 ZOOM = 3
@@ -64,6 +69,7 @@ def _compute_stl(folium_output: dict):
         # this line should never be reached, since the button is deactivated in the given if clause
         st.warning("You need to draw a rectangle on the map first!")
     else:
+        _cleanup_of_old_stl_files(older_than_n_days=10)
         geometry = folium_output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
         if _selected_region_below_threshold(geometry):
@@ -83,13 +89,25 @@ def _compute_stl(folium_output: dict):
             )
 
 
-def _download_btn(data, disabled):
+def _download_btn(data: str, disabled: bool) -> None:
     st.sidebar.download_button(
         label=BTN_LABEL_DOWNLOAD_STL,
         data=data,
         file_name=f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_mapa-streamlit.stl',
         disabled=disabled,
     )
+
+
+def _cleanup_of_old_stl_files(path: Path = TMPDIR(), older_than_n_days: int = 10) -> None:
+    for file in path.iterdir():
+        if file.suffix == ".stl":
+            creation_ts = os.path.getmtime(file)
+            creation_date = datetime.datetime.utcfromtimestamp(creation_ts).date()
+            if creation_date >= datetime.datetime.today().date() + datetime.timedelta(days=older_than_n_days):
+                log.info(f"file is older than {older_than_n_days} days, deleting it: {file}")
+                file.unlink()
+            else:
+                log.info(f"file not older than {older_than_n_days} days, won't delete it: {file}")
 
 
 # run app
