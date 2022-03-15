@@ -1,9 +1,4 @@
-from mapa_streamlit import __version__
 from mapa_streamlit.app import _cleanup_of_old_stl_files
-
-
-def test_version():
-    assert __version__ == "0.1.0"
 
 
 def test__cleanup_of_old_stl_files(tmp_path):

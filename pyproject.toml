@@ -4,11 +4,15 @@ version = "0.2.0"
 description = ""
 authors = ["Fabian Gebhart"]
 
+# Note: always export as requirements.txt when updating the dependencies to ensure streamlit cloud works, using
+# poetry export --without-hashes > requirements.txt
+
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 streamlit = "^1.7.0"
 streamlit-folium = "^0.6.2"
 mapa = "^0.6.0"
+tomli = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.0"
