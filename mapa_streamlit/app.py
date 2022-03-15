@@ -11,7 +11,6 @@ from folium.plugins import Draw
 from mapa import convert_bbox_to_stl
 from mapa.caching import get_hash_of_geojson
 from mapa.utils import TMPDIR
-from shapely.geometry import Polygon
 from streamlit_folium import st_folium
 
 log = logging.getLogger(__name__)
@@ -25,6 +24,7 @@ Z_SCALE = 2.0
 AREA_THRESHOLD = 30.0
 BTN_LABEL_CREATE_STL = "Create STL"
 BTN_LABEL_DOWNLOAD_STL = "Download STL"
+MAX_NUMBER_OF_STAC_ITEMS = 20
 ABOUT = """
 # mapa 🌍
 Hi my name is Fabian Gebhart :wave: and I am the author of mapa. mapa let's you create 3D-printable STL files
@@ -61,11 +61,6 @@ def _show_map(center: List[float], zoom: int) -> folium.Map:
     return m
 
 
-def _selected_region_below_threshold(geometry):
-    area = Polygon(geometry["coordinates"][0]).area
-    return area < AREA_THRESHOLD
-
-
 def _compute_stl(folium_output: dict, progress_bar: st.progress):
     if folium_output["last_active_drawing"] is None:
         # this line should never be reached, since the button is deactivated in the given if clause
@@ -74,19 +69,20 @@ def _compute_stl(folium_output: dict, progress_bar: st.progress):
         _cleanup_of_old_stl_files(older_than_n_days=3)
         geometry = folium_output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
-        if _selected_region_below_threshold(geometry):
-            path = TMPDIR() / f"{geo_hash}.stl"
-            progress_bar.progress(0)
+        path = TMPDIR() / f"{geo_hash}.stl"
+        progress_bar.progress(0)
+        try:
             convert_bbox_to_stl(
                 bbox_geometry=geometry,
                 z_scale=Z_SCALE if z_scale is None else z_scale,
                 z_offset=Z_OFFSET if z_offset is None else z_offset,
                 output_file=path,
+                max_number_of_stac_items=MAX_NUMBER_OF_STAC_ITEMS,
                 progress_bar=progress_bar,
             )
             # it is important to spawn this success message in the sidebar, because state will get lost otherwise
             st.sidebar.success("Successfully computed STL file!")
-        else:
+        except ValueError:
             st.sidebar.warning(
                 "Selected region is too large, fetching data for this area would consume too many resources. "
                 "Please select a smaller region."
