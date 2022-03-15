@@ -13,6 +13,8 @@ from mapa.caching import get_hash_of_geojson
 from mapa.utils import TMPDIR
 from streamlit_folium import st_folium
 
+from mapa_streamlit import __version__
+
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
 log.addHandler(handler)
@@ -25,7 +27,7 @@ AREA_THRESHOLD = 30.0
 BTN_LABEL_CREATE_STL = "Create STL"
 BTN_LABEL_DOWNLOAD_STL = "Download STL"
 MAX_NUMBER_OF_STAC_ITEMS = 20
-ABOUT = """
+ABOUT = f"""
 # mapa 🌍
 Hi my name is Fabian Gebhart :wave: and I am the author of mapa. mapa let's you create 3D-printable STL files
 from every region around the globe. The elevation data is retrieved from
@@ -36,6 +38,7 @@ If you want to reach out, follow me or report a bug, you can do so via
 For more details please refer to:
 * the [mapa-streamlit repo](https://github.com/fgebhart/mapa-streamlit) which contains the source code of this streamlit app or
 * the original [mapa repo](https://github.com/fgebhart/mapa) which contains the source code of the [mapa python package](https://pypi.org/project/mapa/)
+Made with mapa-streamlit v{__version__}
 """
 
 
