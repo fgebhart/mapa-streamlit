@@ -46,7 +46,6 @@ def _show_map(center: List[float], zoom: int) -> folium.Map:
         tiles="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
         attr='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
     )
-
     Draw(
         export=False,
         position="topleft",
@@ -67,28 +66,30 @@ def _selected_region_below_threshold(geometry):
     return area < AREA_THRESHOLD
 
 
-def _compute_stl(folium_output: dict):
+def _compute_stl(folium_output: dict, progress_bar: st.progress):
     if folium_output["last_active_drawing"] is None:
         # this line should never be reached, since the button is deactivated in the given if clause
-        st.warning("You need to draw a rectangle on the map first!")
+        st.sidebar.warning("You need to draw a rectangle on the map first!")
     else:
         _cleanup_of_old_stl_files(older_than_n_days=3)
         geometry = folium_output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
         if _selected_region_below_threshold(geometry):
             path = TMPDIR() / f"{geo_hash}.stl"
+            progress_bar.progress(0)
             convert_bbox_to_stl(
                 bbox_geometry=geometry,
                 z_scale=Z_SCALE if z_scale is None else z_scale,
                 z_offset=Z_OFFSET if z_offset is None else z_offset,
                 output_file=path,
+                progress_bar=progress_bar,
             )
             # it is important to spawn this success message in the sidebar, because state will get lost otherwise
             st.sidebar.success("Successfully computed STL file!")
         else:
-            st.warning(
-                "‼️ Selected region is too large, fetching data for this area would consume too many resources. "
-                "Please select a smaller region. ‼️"
+            st.sidebar.warning(
+                "Selected region is too large, fetching data for this area would consume too many resources. "
+                "Please select a smaller region."
             )
 
 
@@ -141,9 +142,13 @@ if __name__ == "__main__":
             geometry = output["last_active_drawing"]["geometry"]
             geo_hash = get_hash_of_geojson(geometry)
 
+    # ensure progress bar resides at top of sidebar and is invisible initially
+    progress_bar = st.sidebar.progress(0)
+    progress_bar.empty()
+
     # Getting Started container
-    with st.container():
-        st.sidebar.markdown(
+    with st.sidebar.container():
+        st.markdown(
             f"""
             # Getting Started
             1. Click the black square on the map
@@ -152,14 +157,14 @@ if __name__ == "__main__":
             """,
             unsafe_allow_html=True,
         )
-        st.sidebar.button(
+        st.button(
             BTN_LABEL_CREATE_STL,
             key="create_stl",
             on_click=_compute_stl,
-            kwargs={"folium_output": output},
+            kwargs={"folium_output": output, "progress_bar": progress_bar},
             disabled=False if geo_hash else True,
         )
-        st.sidebar.markdown(
+        st.markdown(
             f"""
             4. Wait for the computation to finish
             5. Click on <kbd>{BTN_LABEL_DOWNLOAD_STL}</kbd>
@@ -167,25 +172,22 @@ if __name__ == "__main__":
             unsafe_allow_html=True,
         )
 
-    if geo_hash:
-        path = TMPDIR() / f"{geo_hash}.stl"
-        if path.is_file():
-            with open(path, "rb") as fp:
-                _download_btn(fp, False)
-        else:
-            _download_btn(b"None", True)
+    stl_path = TMPDIR() / f"{geo_hash}.stl"
+    if stl_path.is_file():
+        with open(stl_path, "rb") as fp:
+            _download_btn(fp, False)
     else:
         _download_btn(b"None", True)
 
-    st.sidebar.markdown("""---""")
+    st.sidebar.markdown("---")
 
     # Customization container
-    with st.container():
-        st.sidebar.write(
+    with st.sidebar.container():
+        st.write(
             """
             # Customization
             Use below options to customize the output STL file:
             """
         )
-        z_offset = st.sidebar.slider("z-offset (in millimeter):", 0, 20, Z_OFFSET)
-        z_scale = st.sidebar.slider("z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE)
+        z_offset = st.slider("z-offset (in millimeter):", 0, 20, Z_OFFSET)
+        z_scale = st.slider("z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE)
