@@ -1,8 +1,6 @@
 import datetime
 import logging
-import os
 import sys
-from pathlib import Path
 from typing import List
 
 import folium
@@ -14,10 +12,12 @@ from mapa.utils import TMPDIR
 from streamlit_folium import st_folium
 
 from mapa_streamlit import __version__
+from mapa_streamlit.cleaning import run_cleanup_job
 
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
 log.addHandler(handler)
+
 
 CENTER = [25.0, 55.0]
 ZOOM = 3
@@ -27,6 +27,7 @@ AREA_THRESHOLD = 30.0
 BTN_LABEL_CREATE_STL = "Create STL"
 BTN_LABEL_DOWNLOAD_STL = "Download STL"
 MAX_NUMBER_OF_STAC_ITEMS = 20
+DISK_CLEANING_THRESHOLD = 70.0
 ABOUT = f"""
 # mapa 🌍
 Hi my name is Fabian Gebhart :wave: and I am the author of mapa. mapa let's you create 3D-printable STL files
@@ -69,10 +70,11 @@ def _compute_stl(folium_output: dict, progress_bar: st.progress):
         # this line should never be reached, since the button is deactivated in the given if clause
         st.sidebar.warning("You need to draw a rectangle on the map first!")
     else:
-        _cleanup_of_old_stl_files(older_than_n_days=3)
         geometry = folium_output["last_active_drawing"]["geometry"]
         geo_hash = get_hash_of_geojson(geometry)
-        path = TMPDIR() / f"{geo_hash}.stl"
+        mapa_cache_dir = TMPDIR()
+        run_cleanup_job(path=mapa_cache_dir, disk_cleaning_threshold=DISK_CLEANING_THRESHOLD)
+        path = mapa_cache_dir / f"{geo_hash}.stl"
         progress_bar.progress(0)
         try:
             convert_bbox_to_stl(
@@ -99,18 +101,6 @@ def _download_btn(data: str, disabled: bool) -> None:
         file_name=f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_mapa-streamlit.stl',
         disabled=disabled,
     )
-
-
-def _cleanup_of_old_stl_files(path: Path = TMPDIR(), older_than_n_days: int = 10) -> None:
-    for file in path.iterdir():
-        if file.suffix == ".stl":
-            creation_ts = os.path.getmtime(file)
-            creation_date = datetime.datetime.utcfromtimestamp(creation_ts).date()
-            if creation_date >= datetime.datetime.today().date() + datetime.timedelta(days=older_than_n_days):
-                log.info(f"file is older than {older_than_n_days} days, deleting it: {file}")
-                file.unlink()
-            else:
-                log.info(f"file not older than {older_than_n_days} days, won't delete it: {file}")
 
 
 if __name__ == "__main__":
