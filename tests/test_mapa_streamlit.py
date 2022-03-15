@@ -1,4 +1,4 @@
-from mapa_streamlit.app import _cleanup_of_old_stl_files
+from app import _cleanup_of_old_stl_files
 
 
 def test__cleanup_of_old_stl_files(tmp_path):
