@@ -8,4 +8,4 @@ exclude =
     .eggs,
 max-line-length = 121
 per-file-ignores =
-    mapa_streamlit/app.py:E501
+    app.py:E501
