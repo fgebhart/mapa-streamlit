@@ -18,7 +18,7 @@ IGNORED_EXCEPTIONS = (
 
 def test_streamlit_app__basic(live_server, webdriver) -> None:
     assert webdriver.current_url == live_server.url
-    time.sleep(3)
+    time.sleep(1)
 
     h1 = [e.text for e in webdriver.find_elements(By.TAG_NAME, "h1")]
     assert "Getting Started" in h1
