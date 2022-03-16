@@ -1,3 +1,5 @@
+import time
+
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -16,7 +18,7 @@ IGNORED_EXCEPTIONS = (
 
 def test_streamlit_app__basic(live_server, webdriver) -> None:
     assert webdriver.current_url == live_server.url
-    webdriver.implicitly_wait(3)
+    time.sleep(3)
 
     h1 = [e.text for e in webdriver.find_elements(By.TAG_NAME, "h1")]
     assert "Getting Started" in h1
