@@ -1,8 +1,12 @@
 [tool.poetry]
 name = "mapa-streamlit"
 version = "0.3.0"
-description = ""
+description = "Streamlit web app 🎈 for creating 3D-printable models of the earth 🌍 surface based on mapa"
 authors = ["Fabian Gebhart"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+]
 
 # Note: always export as requirements.txt when updating the dependencies to ensure streamlit cloud works, using
 # poetry export --without-hashes > requirements.txt
