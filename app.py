@@ -105,13 +105,11 @@ def _download_btn(data: str, disabled: bool) -> None:
 
 if __name__ == "__main__":
     st.set_page_config(
-        page_title="mapa streamlit",
+        page_title="mapa",
         page_icon="🌍",
         layout="wide",
         initial_sidebar_state="expanded",
-        menu_items={
-            "About": ABOUT,
-        },
+        menu_items={"About": ABOUT},
     )
 
     st.markdown(
