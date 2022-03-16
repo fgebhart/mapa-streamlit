@@ -11,36 +11,22 @@ from mapa.caching import get_hash_of_geojson
 from mapa.utils import TMPDIR
 from streamlit_folium import st_folium
 
-from mapa_streamlit import __version__
 from mapa_streamlit.cleaning import run_cleanup_job
+from mapa_streamlit.settings import (
+    ABOUT,
+    BTN_LABEL_CREATE_STL,
+    BTN_LABEL_DOWNLOAD_STL,
+    DISK_CLEANING_THRESHOLD,
+    MAP_CENTER,
+    MAP_ZOOM,
+    MAX_NUMBER_OF_STAC_ITEMS,
+    ZOffsetSlider,
+    ZScaleSlider,
+)
 
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
 log.addHandler(handler)
-
-
-CENTER = [25.0, 55.0]
-ZOOM = 3
-Z_OFFSET = 2
-Z_SCALE = 2.0
-AREA_THRESHOLD = 30.0
-BTN_LABEL_CREATE_STL = "Create STL"
-BTN_LABEL_DOWNLOAD_STL = "Download STL"
-MAX_NUMBER_OF_STAC_ITEMS = 20
-DISK_CLEANING_THRESHOLD = 70.0
-ABOUT = f"""
-# mapa 🌍
-Hi my name is Fabian Gebhart :wave: and I am the author of mapa. mapa let's you create 3D-printable STL files
-from every region around the globe. The elevation data is retrieved from
-[ALOS DEM hosted by MS Planetary Computer](https://planetarycomputer.microsoft.com/dataset/alos-dem), which provides
-satellite data with 30m resolution.
-If you want to reach out, follow me or report a bug, you can do so via
-[Github](https://github.com/fgebhart) or [Twitter](https://twitter.com/FabianGebhart).
-For more details please refer to:
-* the [mapa-streamlit repo](https://github.com/fgebhart/mapa-streamlit) which contains the source code of this streamlit app or
-* the original [mapa repo](https://github.com/fgebhart/mapa) which contains the source code of the [mapa python package](https://pypi.org/project/mapa/)
-Made with mapa-streamlit v{__version__}
-"""
 
 
 def _show_map(center: List[float], zoom: int) -> folium.Map:
@@ -48,7 +34,7 @@ def _show_map(center: List[float], zoom: int) -> folium.Map:
         location=center,
         zoom_start=zoom,
         tiles="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-        attr='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+        attr='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',  # noqa: E501
     )
     Draw(
         export=False,
@@ -79,8 +65,8 @@ def _compute_stl(folium_output: dict, progress_bar: st.progress):
         try:
             convert_bbox_to_stl(
                 bbox_geometry=geometry,
-                z_scale=Z_SCALE if z_scale is None else z_scale,
-                z_offset=Z_OFFSET if z_offset is None else z_offset,
+                z_scale=ZScaleSlider.value if z_scale is None else z_scale,
+                z_offset=ZOffsetSlider.value if z_offset is None else z_offset,
                 output_file=path,
                 max_number_of_stac_items=MAX_NUMBER_OF_STAC_ITEMS,
                 progress_bar=progress_bar,
@@ -105,13 +91,11 @@ def _download_btn(data: str, disabled: bool) -> None:
 
 if __name__ == "__main__":
     st.set_page_config(
-        page_title="mapa streamlit",
+        page_title="mapa",
         page_icon="🌍",
         layout="wide",
         initial_sidebar_state="expanded",
-        menu_items={
-            "About": ABOUT,
-        },
+        menu_items={"About": ABOUT},
     )
 
     st.markdown(
@@ -122,7 +106,7 @@ if __name__ == "__main__":
         unsafe_allow_html=True,
     )
     st.write("\n")
-    m = _show_map(center=CENTER, zoom=ZOOM)
+    m = _show_map(center=MAP_CENTER, zoom=MAP_ZOOM)
     output = st_folium(m, key="init", width=1000, height=600)
 
     geo_hash = None
@@ -178,5 +162,10 @@ if __name__ == "__main__":
             Use below options to customize the output STL file:
             """
         )
-        z_offset = st.slider("z-offset (in millimeter):", 0, 20, Z_OFFSET)
-        z_scale = st.slider("z-scale (factor to be multiplied to the z-axis):", 0.0, 5.0, Z_SCALE)
+        z_offset = st.slider(ZOffsetSlider.label, ZOffsetSlider.min_value, ZOffsetSlider.max_value, ZOffsetSlider.value)
+        z_scale = st.slider(
+            ZScaleSlider.label,
+            ZScaleSlider.min_value,
+            ZScaleSlider.max_value,
+            ZScaleSlider.value,
+        )
