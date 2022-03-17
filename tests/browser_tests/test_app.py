@@ -9,7 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from mapa_streamlit import __version__
 from mapa_streamlit.settings import ZOffsetSlider, ZScaleSlider
 
-TIMEOUT = 3
+DELAY = 3
 IGNORED_EXCEPTIONS = (
     NoSuchElementException,
     StaleElementReferenceException,
@@ -18,7 +18,7 @@ IGNORED_EXCEPTIONS = (
 
 def test_streamlit_app__basic(live_server, webdriver) -> None:
     assert webdriver.current_url == live_server.url
-    time.sleep(1)
+    time.sleep(DELAY)
 
     h1 = [e.text for e in webdriver.find_elements(By.TAG_NAME, "h1")]
     assert "Getting Started" in h1
@@ -35,8 +35,8 @@ def test_streamlit_app__basic(live_server, webdriver) -> None:
     assert "Wait for the computation to finish" in li
     assert "Click on Download STL" in li
 
-    WebDriverWait(webdriver, TIMEOUT).until(EC.presence_of_element_located((By.TAG_NAME, "button")))
-    WebDriverWait(webdriver, TIMEOUT, ignored_exceptions=IGNORED_EXCEPTIONS).until(
+    WebDriverWait(webdriver, DELAY).until(EC.presence_of_element_located((By.TAG_NAME, "button")))
+    WebDriverWait(webdriver, DELAY, ignored_exceptions=IGNORED_EXCEPTIONS).until(
         EC.element_to_be_clickable((By.TAG_NAME, "button"))
     )
 
@@ -66,15 +66,15 @@ def test_streamlit_app__basic(live_server, webdriver) -> None:
     actions.move_to_element(element).perform()
 
     about_xpath = "/html/body/div/div[2]/div/div/div[3]/div/div/ul[1]/ul[6]/li/span"
-    WebDriverWait(webdriver, TIMEOUT).until(EC.element_to_be_clickable((By.TAG_NAME, "span")))
-    WebDriverWait(webdriver, TIMEOUT).until(EC.presence_of_element_located((By.XPATH, about_xpath)))
-    WebDriverWait(webdriver, TIMEOUT, ignored_exceptions=IGNORED_EXCEPTIONS).until(
+    WebDriverWait(webdriver, DELAY).until(EC.element_to_be_clickable((By.TAG_NAME, "span")))
+    WebDriverWait(webdriver, DELAY).until(EC.presence_of_element_located((By.XPATH, about_xpath)))
+    WebDriverWait(webdriver, DELAY, ignored_exceptions=IGNORED_EXCEPTIONS).until(
         EC.element_to_be_clickable((By.XPATH, about_xpath))
     )
 
     about = webdriver.find_element(By.XPATH, about_xpath)
     about.click()
-    webdriver.implicitly_wait(3)
+    webdriver.implicitly_wait(DELAY)
     text = [e.text for e in webdriver.find_elements(By.TAG_NAME, "p")]
     about_text = " ".join(text)
 
