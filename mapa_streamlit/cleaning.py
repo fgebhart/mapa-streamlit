@@ -63,7 +63,7 @@ def run_cleanup_job(path: Path, disk_cleaning_threshold: float) -> None:
     log.info(f"💾  Disk usage: {disk_usage}%, mapa cache size: {mapa_cache} MB")
     stl_num = _get_number_of_files_in_dir(path, ".stl")
     tiff_num = _get_number_of_files_in_dir(path, ".tiff")
-    log.info(f"🗂   Number of STL files: {stl_num}, number of TIFF files: {tiff_num}")
+    log.info(f"🗂  Number of STL files: {stl_num}, number of TIFF files: {tiff_num}")
     if disk_usage > disk_cleaning_threshold:
         log.info(f"🧹  Disk usage exceeds threshold ({disk_usage}%>{disk_cleaning_threshold}%), deleting files ...")
         _delete_stl_files_in_dir(path, ".stl")
