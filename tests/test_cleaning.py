@@ -1,5 +1,5 @@
 from mapa_streamlit.cleaning import (
-    _delete_stl_files_in_dir,
+    _delete_files_in_dir,
     _get_data_size_of_dir,
     _get_disk_usage,
     _get_number_of_files_in_dir,
@@ -54,22 +54,22 @@ def test__get_data_size_of_dir(tmp_path):
     assert size == round((file_1_size + file_2_size + file_3_size) / 1024**2, 4)
 
 
-def test__delete_stl_files_in_dir(tmp_path) -> None:
+def test__delete_files_in_dir(tmp_path) -> None:
     # verify function deletes stl file
     p = tmp_path / "baa.stl"
     p.write_text("foo")
     assert p.is_file()
-    _delete_stl_files_in_dir(tmp_path, ".stl")
+    _delete_files_in_dir(tmp_path, ".stl")
     assert not p.is_file()
 
     # running it again does not fail
-    _delete_stl_files_in_dir(tmp_path, ".stl")
+    _delete_files_in_dir(tmp_path, ".stl")
 
     # ensure files beside stl files won't be deleted
     p = tmp_path / "baa.tiff"
     p.write_text("foo")
     assert p.is_file()
-    _delete_stl_files_in_dir(tmp_path, ".stl")
+    _delete_files_in_dir(tmp_path, ".stl")
     assert p.is_file()
 
 
@@ -93,7 +93,7 @@ def test__get_number_of_files_in_dir(tmp_path) -> None:
 
 
 def test_run_cleanup_job(tmp_path) -> None:
-    # chose very low threshold to ensure stl files will be delted
+    # chose very low threshold to ensure files will be delted
     stl = tmp_path / "baa.stl"
     stl.write_text("foo")
     assert stl.is_file()
@@ -105,7 +105,7 @@ def test_run_cleanup_job(tmp_path) -> None:
     assert not stl.is_file()
     assert tiff.is_file()
 
-    # chose very high threshold to check that stl files won't get deleted
+    # chose very high threshold to check that files won't get deleted
     stl = tmp_path / "baa.stl"
     stl.write_text("foo")
     assert stl.is_file()
