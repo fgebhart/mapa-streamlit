@@ -2,10 +2,14 @@ from mapa_streamlit import __version__
 
 MAP_CENTER = [25.0, 55.0]
 MAP_ZOOM = 3
+
 BTN_LABEL_CREATE_STL = "Create STL"
 BTN_LABEL_DOWNLOAD_STL = "Download STL"
-MAX_NUMBER_OF_STAC_ITEMS = 20
+
+MAX_ALLOWED_AREA_SIZE = 30.0
+
 DISK_CLEANING_THRESHOLD = 60.0
+
 ABOUT = f"""
 # mapa 🌍
 Hi my name is Fabian Gebhart :wave: and I am the author of mapa. mapa let's you create 3D-printable STL files
