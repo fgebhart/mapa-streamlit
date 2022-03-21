@@ -55,32 +55,32 @@ def _show_map(center: List[float], zoom: int) -> folium.Map:
     return m
 
 
-def _compute_stl(folium_output: dict, progress_bar: st.progress):
-    if folium_output["last_active_drawing"] is None:
-        # this line should never be reached, since the button is deactivated in the given if clause
-        st.sidebar.warning("You need to draw a rectangle on the map first!")
+def _compute_stl(geometry: dict, progress_bar: st.progress) -> None:
+    geo_hash = get_hash_of_geojson(geometry)
+    mapa_cache_dir = TMPDIR()
+    run_cleanup_job(path=mapa_cache_dir, disk_cleaning_threshold=DISK_CLEANING_THRESHOLD)
+    path = mapa_cache_dir / f"{geo_hash}.stl"
+    progress_bar.progress(0)
+    convert_bbox_to_stl(
+        bbox_geometry=geometry,
+        z_scale=ZScaleSlider.value if z_scale is None else z_scale,
+        z_offset=ZOffsetSlider.value if z_offset is None else z_offset,
+        output_file=path,
+        progress_bar=progress_bar,
+    )
+    # it is important to spawn this success message in the sidebar, because state will get lost otherwise
+    st.sidebar.success("Successfully computed STL file!")
+
+
+def _check_area_and_compute_stl(folium_output: dict, progress_bar: st.progress) -> None:
+    geometry = folium_output["last_active_drawing"]["geometry"]
+    if _selected_bbox_too_large(geometry, threshold=MAX_ALLOWED_AREA_SIZE):
+        st.sidebar.warning(
+            "Selected region is too large, fetching data for this area would consume too many resources. "
+            "Please select a smaller region."
+        )
     else:
-        geometry = folium_output["last_active_drawing"]["geometry"]
-        if _selected_bbox_too_large(geometry, threshold=MAX_ALLOWED_AREA_SIZE):
-            st.sidebar.warning(
-                "Selected region is too large, fetching data for this area would consume too many resources. "
-                "Please select a smaller region."
-            )
-        else:
-            geo_hash = get_hash_of_geojson(geometry)
-            mapa_cache_dir = TMPDIR()
-            run_cleanup_job(path=mapa_cache_dir, disk_cleaning_threshold=DISK_CLEANING_THRESHOLD)
-            path = mapa_cache_dir / f"{geo_hash}.stl"
-            progress_bar.progress(0)
-            convert_bbox_to_stl(
-                bbox_geometry=geometry,
-                z_scale=ZScaleSlider.value if z_scale is None else z_scale,
-                z_offset=ZOffsetSlider.value if z_offset is None else z_offset,
-                output_file=path,
-                progress_bar=progress_bar,
-            )
-            # it is important to spawn this success message in the sidebar, because state will get lost otherwise
-            st.sidebar.success("Successfully computed STL file!")
+        _compute_stl(geometry, progress_bar)
 
 
 def _download_btn(data: str, disabled: bool) -> None:
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         st.button(
             BTN_LABEL_CREATE_STL,
             key="create_stl",
-            on_click=_compute_stl,
+            on_click=_check_area_and_compute_stl,
             kwargs={"folium_output": output, "progress_bar": progress_bar},
             disabled=False if geo_hash else True,
         )
