@@ -36,6 +36,7 @@ def _show_map(center: List[float], zoom: int) -> folium.Map:
     m = folium.Map(
         location=center,
         zoom_start=zoom,
+        control_scale=True,
         tiles="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
         attr='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',  # noqa: E501
     )
@@ -61,7 +62,6 @@ def _compute_stl(folium_output: dict, progress_bar: st.progress):
     else:
         geometry = folium_output["last_active_drawing"]["geometry"]
         if _selected_bbox_too_large(geometry, threshold=MAX_ALLOWED_AREA_SIZE):
-            log.warning("Selected area is too large, aborting.")
             st.sidebar.warning(
                 "Selected region is too large, fetching data for this area would consume too many resources. "
                 "Please select a smaller region."
