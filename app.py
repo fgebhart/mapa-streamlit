@@ -20,11 +20,12 @@ from mapa_streamlit.settings import (
     DISK_CLEANING_THRESHOLD,
     MAP_CENTER,
     MAP_ZOOM,
+    MAPA_SHINES_AT,
     MAX_ALLOWED_AREA_SIZE,
     ZOffsetSlider,
     ZScaleSlider,
 )
-from mapa_streamlit.verification import _selected_bbox_too_large
+from mapa_streamlit.verification import selected_bbox_out_of_bounds, selected_bbox_too_large
 
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
@@ -72,12 +73,20 @@ def _compute_stl(geometry: dict, progress_bar: st.progress) -> None:
     st.sidebar.success("Successfully computed STL file!")
 
 
-def _check_area_and_compute_stl(folium_output: dict, progress_bar: st.progress) -> None:
+def _verify_bbox_and_compute_stl(folium_output: dict, progress_bar: st.progress) -> None:
     geometry = folium_output["last_active_drawing"]["geometry"]
-    if _selected_bbox_too_large(geometry, threshold=MAX_ALLOWED_AREA_SIZE):
+    bbox = geometry["coordinates"][0]
+    # apply verification on bbox to ensure subsequent computation will succeed
+    if selected_bbox_out_of_bounds():
         st.sidebar.warning(
-            "Selected region is too large, fetching data for this area would consume too many resources. "
-            "Please select a smaller region."
+            f"Selected region is out of bounds. The selected bounding box must be within (-180, -90, 180, 90). "
+            f"This issue usually occurs if the map is scrolled out too far and the bounding box is drawn over "
+            f"the 'edge of the world'. Try selecting a smaller area. {MAPA_SHINES_AT}"
+        )
+    elif selected_bbox_too_large(bbox, threshold=MAX_ALLOWED_AREA_SIZE):
+        st.sidebar.warning(
+            f"Selected region is too large, fetching data for this area would consume too many resources. "
+            f"Try selecting a smaller area. {MAPA_SHINES_AT}"
         )
     else:
         _compute_stl(geometry, progress_bar)
@@ -136,7 +145,7 @@ if __name__ == "__main__":
         st.button(
             BTN_LABEL_CREATE_STL,
             key="create_stl",
-            on_click=_check_area_and_compute_stl,
+            on_click=_verify_bbox_and_compute_stl,
             kwargs={"folium_output": output, "progress_bar": progress_bar},
             disabled=False if geo_hash else True,
         )

@@ -15,8 +15,24 @@ def _get_area(bbox: List[List[float]]) -> float:
     return round(abs(width * height), 2)
 
 
-def _selected_bbox_too_large(geometry: dict, threshold: float) -> bool:
-    bbox = geometry["coordinates"][0]
+def selected_bbox_too_large(bbox: List[List[float]], threshold: float) -> bool:
     area = _get_area(bbox=bbox)
     log.info(f"area with size: {area} was selected, threshold is: {threshold}")
     return area > threshold
+
+
+def selected_bbox_out_of_bounds(bbox: List[List[float]]) -> bool:
+    out_of_bounds = False
+    # TODO refactor this function
+    for coordinate in bbox:
+        # check first coordinate
+        if -180 < coordinate[0] < 180:
+            out_of_bounds = False
+        else:
+            out_of_bounds = True
+        # check second coordinate
+        if -90 < coordinate[1] < 90:
+            out_of_bounds = False
+        else:
+            out_of_bounds = True
+    return out_of_bounds

@@ -24,6 +24,9 @@ For more details please refer to:
 Made with mapa-streamlit v{__version__}
 """
 
+MAPA_SHINES_AT = """
+Mapa shines at generating 3d models of particular regions, mountains or cities. Generating 3d models of e.g. entire continents is currently not supported.
+"""
 
 DEFAULT_Z_OFFSET = 2
 DEFAULT_Z_SCALE = 2.0
