@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 import sys
 from typing import List
 
@@ -19,14 +20,16 @@ from mapa_streamlit.settings import (
     DISK_CLEANING_THRESHOLD,
     MAP_CENTER,
     MAP_ZOOM,
-    MAX_NUMBER_OF_STAC_ITEMS,
+    MAX_ALLOWED_AREA_SIZE,
     ZOffsetSlider,
     ZScaleSlider,
 )
+from mapa_streamlit.verification import _selected_bbox_too_large
 
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
 log.addHandler(handler)
+log.setLevel(os.getenv("MAPA_STREAMLIT_LOG_LEVEL", "DEBUG"))
 
 
 def _show_map(center: List[float], zoom: int) -> folium.Map:
@@ -57,27 +60,27 @@ def _compute_stl(folium_output: dict, progress_bar: st.progress):
         st.sidebar.warning("You need to draw a rectangle on the map first!")
     else:
         geometry = folium_output["last_active_drawing"]["geometry"]
-        geo_hash = get_hash_of_geojson(geometry)
-        mapa_cache_dir = TMPDIR()
-        run_cleanup_job(path=mapa_cache_dir, disk_cleaning_threshold=DISK_CLEANING_THRESHOLD)
-        path = mapa_cache_dir / f"{geo_hash}.stl"
-        progress_bar.progress(0)
-        try:
+        if _selected_bbox_too_large(geometry, threshold=MAX_ALLOWED_AREA_SIZE):
+            log.warning("Selected area is too large, aborting.")
+            st.sidebar.warning(
+                "Selected region is too large, fetching data for this area would consume too many resources. "
+                "Please select a smaller region."
+            )
+        else:
+            geo_hash = get_hash_of_geojson(geometry)
+            mapa_cache_dir = TMPDIR()
+            run_cleanup_job(path=mapa_cache_dir, disk_cleaning_threshold=DISK_CLEANING_THRESHOLD)
+            path = mapa_cache_dir / f"{geo_hash}.stl"
+            progress_bar.progress(0)
             convert_bbox_to_stl(
                 bbox_geometry=geometry,
                 z_scale=ZScaleSlider.value if z_scale is None else z_scale,
                 z_offset=ZOffsetSlider.value if z_offset is None else z_offset,
                 output_file=path,
-                max_number_of_stac_items=MAX_NUMBER_OF_STAC_ITEMS,
                 progress_bar=progress_bar,
             )
             # it is important to spawn this success message in the sidebar, because state will get lost otherwise
             st.sidebar.success("Successfully computed STL file!")
-        except ValueError:
-            st.sidebar.warning(
-                "Selected region is too large, fetching data for this area would consume too many resources. "
-                "Please select a smaller region."
-            )
 
 
 def _download_btn(data: str, disabled: bool) -> None:
