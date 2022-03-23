@@ -31,7 +31,7 @@ SQUARED_SIDE_RATIO = 1.0
 
 
 class ZOffsetSlider:
-    label: str = "z-offset"
+    label: str = "Z-offset"
     min_value: int = 0
     max_value: int = 20
     value: int = DEFAULT_Z_OFFSET
@@ -39,7 +39,7 @@ class ZOffsetSlider:
 
 
 class ZScaleSlider:
-    label: str = "z-scale"
+    label: str = "Z-scale"
     min_value: int = 0.0
     max_value: int = 5.0
     value: int = DEFAULT_Z_SCALE

@@ -6,4 +6,4 @@ A [streamlit web app](https://share.streamlit.io/fgebhart/mapa-streamlit/main/ap
 STL files using satellite elevation data ([ALOS DEM](https://planetarycomputer.microsoft.com/dataset/alos-dem)) based on
 [mapa](https://github.com/fgebhart/mapa).
 
-![](https://i.imgur.com/faraqeQ.png)
+![](https://i.imgur.com/WRwXpeE.png)
