@@ -4,5 +4,6 @@
         "psutil",
         "stac",
         "streamlit"
-    ]
+    ],
+    "cSpell.enabled": true
 }
