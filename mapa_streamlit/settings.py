@@ -27,17 +27,29 @@ Made with mapa-streamlit v{__version__}
 
 DEFAULT_Z_OFFSET = 2
 DEFAULT_Z_SCALE = 2.0
+SQUARED_SIDE_RATIO = 1.0
 
 
 class ZOffsetSlider:
-    label: str = "z-offset (in millimeter):"
+    label: str = "z-offset"
     min_value: int = 0
     max_value: int = 20
     value: int = DEFAULT_Z_OFFSET
+    help: str = "Offset (in millimeter) to be used to extrude a base in which the 3D elevation shape will be put on."
 
 
 class ZScaleSlider:
-    label: str = "z-scale (factor to be multiplied to the z-axis):"
+    label: str = "z-scale"
     min_value: int = 0.0
     max_value: int = 5.0
     value: int = DEFAULT_Z_SCALE
+    help: str = "Factor to be multiplied to the z-axis in order to scale the elevation up (or down)."
+
+
+class SquaredCheckbox:
+    label: str = "Squared model output?"
+    help: str = (
+        "Enable this to force the computed output STL file to be squared in x and y dimensions. Note, that the "
+        "rectangle you selected will be cut to achieve this. This option might be helpful, as drawing a perfect "
+        "square by hand is impossible and because the visual map is projected."
+    )

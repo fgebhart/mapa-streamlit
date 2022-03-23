@@ -21,6 +21,8 @@ from mapa_streamlit.settings import (
     MAP_CENTER,
     MAP_ZOOM,
     MAX_ALLOWED_AREA_SIZE,
+    SQUARED_SIDE_RATIO,
+    SquaredCheckbox,
     ZOffsetSlider,
     ZScaleSlider,
 )
@@ -65,6 +67,7 @@ def _compute_stl(geometry: dict, progress_bar: st.progress) -> None:
         bbox_geometry=geometry,
         z_scale=ZScaleSlider.value if z_scale is None else z_scale,
         z_offset=ZOffsetSlider.value if z_offset is None else z_offset,
+        cut_to_format_ratio=SQUARED_SIDE_RATIO if ensure_squared else None,
         output_file=path,
         progress_bar=progress_bar,
     )
@@ -128,8 +131,9 @@ if __name__ == "__main__":
             f"""
             # Getting Started
             1. Click the black square on the map
-            2. Draw a rectangle over your region of intereset (The larger the region the longer the STL file creation takes ☝️)
-            3. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
+            2. Draw a rectangle on the map
+            3. Optional: Apply customizations
+            4. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
             """,
             unsafe_allow_html=True,
         )
@@ -142,8 +146,8 @@ if __name__ == "__main__":
         )
         st.markdown(
             f"""
-            4. Wait for the computation to finish
-            5. Click on <kbd>{BTN_LABEL_DOWNLOAD_STL}</kbd>
+            5. Wait for the computation to finish
+            6. Click on <kbd>{BTN_LABEL_DOWNLOAD_STL}</kbd>
             """,
             unsafe_allow_html=True,
         )
@@ -165,10 +169,21 @@ if __name__ == "__main__":
             Use below options to customize the output STL file:
             """
         )
-        z_offset = st.slider(ZOffsetSlider.label, ZOffsetSlider.min_value, ZOffsetSlider.max_value, ZOffsetSlider.value)
+        z_offset = st.slider(
+            label=ZOffsetSlider.label,
+            min_value=ZOffsetSlider.min_value,
+            max_value=ZOffsetSlider.max_value,
+            value=ZOffsetSlider.value,
+            help=ZOffsetSlider.help,
+        )
         z_scale = st.slider(
-            ZScaleSlider.label,
-            ZScaleSlider.min_value,
-            ZScaleSlider.max_value,
-            ZScaleSlider.value,
+            label=ZScaleSlider.label,
+            min_value=ZScaleSlider.min_value,
+            max_value=ZScaleSlider.max_value,
+            value=ZScaleSlider.value,
+            help=ZScaleSlider.help,
+        )
+        ensure_squared = st.checkbox(
+            label=SquaredCheckbox.label,
+            help=SquaredCheckbox.help,
         )

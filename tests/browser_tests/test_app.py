@@ -27,10 +27,8 @@ def test_streamlit_app__basic(live_server, webdriver) -> None:
 
     li = [e.text for e in webdriver.find_elements(By.TAG_NAME, "li")]
     assert "Click the black square on the map" in li
-    assert (
-        "Draw a rectangle over your region of intereset "
-        "(The larger the region the longer the STL file creation takes ☝️)" in li
-    )
+    assert "Draw a rectangle on the map" in li
+    assert "Optional: Apply customizations" in li
     assert "Click on Create STL" in li
     assert "Wait for the computation to finish" in li
     assert "Click on Download STL" in li
