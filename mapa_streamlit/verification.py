@@ -18,5 +18,5 @@ def _get_area(bbox: List[List[float]]) -> float:
 def _selected_bbox_too_large(geometry: dict, threshold: float) -> bool:
     bbox = geometry["coordinates"][0]
     area = _get_area(bbox=bbox)
-    log.info(f"area with size: {area} was selected, threshold is: {threshold}")
+    log.info(f"📏  area with size: {area} was selected, threshold is: {threshold}")
     return area > threshold

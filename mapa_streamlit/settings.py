@@ -43,6 +43,7 @@ class ZScaleSlider:
     min_value: int = 0.0
     max_value: int = 5.0
     value: int = DEFAULT_Z_SCALE
+    step: float = 0.1
     help: str = "Factor to be multiplied to the z-axis in order to scale the elevation up (or down)."
 
 

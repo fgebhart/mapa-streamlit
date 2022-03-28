@@ -181,6 +181,7 @@ if __name__ == "__main__":
             min_value=ZScaleSlider.min_value,
             max_value=ZScaleSlider.max_value,
             value=ZScaleSlider.value,
+            step=ZScaleSlider.step,
             help=ZScaleSlider.help,
         )
         ensure_squared = st.checkbox(
