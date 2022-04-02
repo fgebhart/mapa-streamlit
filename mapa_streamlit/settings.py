@@ -1,3 +1,5 @@
+from importlib.metadata import version
+
 from mapa_streamlit import __version__
 
 MAP_CENTER = [25.0, 55.0]
@@ -21,7 +23,10 @@ If you want to reach out, follow me or report a bug, you can do so via
 For more details please refer to:
 * the [mapa-streamlit repo](https://github.com/fgebhart/mapa-streamlit) which contains the source code of this streamlit app or
 * the original [mapa repo](https://github.com/fgebhart/mapa) which contains the source code of the [mapa python package](https://pypi.org/project/mapa/)
+
 Made with mapa-streamlit v{__version__}
+
+Made with mapa v{version('mapa')}
 """
 
 
