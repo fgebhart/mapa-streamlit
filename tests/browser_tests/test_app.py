@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from mapa_streamlit import __version__
-from mapa_streamlit.settings import ZOffsetSlider, ZScaleSlider
+from mapa_streamlit.settings import ModelSizeSlider, ZOffsetSlider, ZScaleSlider
 
 DELAY = 3
 IGNORED_EXCEPTIONS = (
@@ -54,6 +54,12 @@ def test_streamlit_app__basic(live_server, webdriver) -> None:
     assert str(ZScaleSlider.max_value) in z_scale_slider
     assert str(ZScaleSlider.min_value) in z_scale_slider
     assert str(ZScaleSlider.value) in z_scale_slider
+
+    model_size_slider = sliders[2]
+    assert ModelSizeSlider.label in model_size_slider
+    assert str(ModelSizeSlider.max_value) in model_size_slider
+    assert str(ModelSizeSlider.min_value) in model_size_slider
+    assert str(ModelSizeSlider.value) in model_size_slider
 
     # verify content of about menu
     hamburger = webdriver.find_element(By.CSS_SELECTOR, "#MainMenu > button:nth-child(1) > svg:nth-child(1)")

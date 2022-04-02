@@ -22,6 +22,7 @@ from mapa_streamlit.settings import (
     MAP_ZOOM,
     MAX_ALLOWED_AREA_SIZE,
     SQUARED_SIDE_RATIO,
+    ModelSizeSlider,
     SquaredCheckbox,
     ZOffsetSlider,
     ZScaleSlider,
@@ -65,6 +66,7 @@ def _compute_stl(geometry: dict, progress_bar: st.progress) -> None:
     progress_bar.progress(0)
     convert_bbox_to_stl(
         bbox_geometry=geometry,
+        model_size=ModelSizeSlider.value if model_size is None else model_size,
         z_scale=ZScaleSlider.value if z_scale is None else z_scale,
         z_offset=ZOffsetSlider.value if z_offset is None else z_offset,
         cut_to_format_ratio=SQUARED_SIDE_RATIO if ensure_squared else None,
@@ -183,6 +185,14 @@ if __name__ == "__main__":
             value=ZScaleSlider.value,
             step=ZScaleSlider.step,
             help=ZScaleSlider.help,
+        )
+        model_size = st.slider(
+            label=ModelSizeSlider.label,
+            min_value=ModelSizeSlider.min_value,
+            max_value=ModelSizeSlider.max_value,
+            value=ModelSizeSlider.value,
+            step=ModelSizeSlider.step,
+            help=ModelSizeSlider.help,
         )
         ensure_squared = st.checkbox(
             label=SquaredCheckbox.label,
