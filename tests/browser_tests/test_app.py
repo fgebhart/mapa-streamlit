@@ -1,4 +1,5 @@
 import time
+from importlib.metadata import version
 
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
@@ -83,4 +84,5 @@ def test_streamlit_app__basic(live_server, webdriver) -> None:
     about_text = " ".join(text)
 
     assert f"Made with mapa-streamlit v{__version__}" in about_text
+    assert f"Made with mapa v{version('mapa')}" in about_text
     assert "Hi my name is" in about_text
