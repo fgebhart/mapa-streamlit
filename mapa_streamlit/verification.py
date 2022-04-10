@@ -15,8 +15,27 @@ def _get_area(bbox: List[List[float]]) -> float:
     return round(abs(width * height), 2)
 
 
-def _selected_bbox_too_large(geometry: dict, threshold: float) -> bool:
+def selected_bbox_too_large(geometry: dict, threshold: float) -> bool:
     bbox = geometry["coordinates"][0]
     area = _get_area(bbox=bbox)
     log.info(f"📏  area with size: {area} was selected, threshold is: {threshold}")
     return area > threshold
+
+
+class CoordinateBoundaries:
+    lon_min: int = -180
+    lat_min: int = -90
+    lon_max: int = 180
+    lat_max: int = 90
+
+
+def selected_bbox_in_boundary(geometry: dict, boundary: CoordinateBoundaries = CoordinateBoundaries) -> bool:
+    bbox = geometry["coordinates"][0]
+    for coordinate in bbox:
+        lon = coordinate[0]
+        lat = coordinate[1]
+        if lon < boundary.lon_min or lon > boundary.lon_max:
+            return False
+        elif lat < boundary.lat_min or lat > boundary.lat_max:
+            return False
+    return True

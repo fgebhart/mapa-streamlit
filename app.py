@@ -27,7 +27,7 @@ from mapa_streamlit.settings import (
     ZOffsetSlider,
     ZScaleSlider,
 )
-from mapa_streamlit.verification import _selected_bbox_too_large
+from mapa_streamlit.verification import selected_bbox_in_boundary, selected_bbox_too_large
 
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
@@ -53,6 +53,7 @@ def _show_map(center: List[float], zoom: int) -> folium.Map:
             "polygon": False,
             "marker": False,
             "circlemarker": False,
+            "rectangle": True,
         },
     ).add_to(m)
     return m
@@ -79,10 +80,15 @@ def _compute_stl(geometry: dict, progress_bar: st.progress) -> None:
 
 def _check_area_and_compute_stl(folium_output: dict, progress_bar: st.progress) -> None:
     geometry = folium_output["last_active_drawing"]["geometry"]
-    if _selected_bbox_too_large(geometry, threshold=MAX_ALLOWED_AREA_SIZE):
+    if selected_bbox_too_large(geometry, threshold=MAX_ALLOWED_AREA_SIZE):
         st.sidebar.warning(
             "Selected region is too large, fetching data for this area would consume too many resources. "
             "Please select a smaller region."
+        )
+    elif not selected_bbox_in_boundary(geometry):
+        st.sidebar.warning(
+            "Selected rectangle is not within the allowed region of the world map. Do not scroll too far to the left or "
+            "right. Ensure to use the initial center view of the world for drawing your rectangle."
         )
     else:
         _compute_stl(geometry, progress_bar)
