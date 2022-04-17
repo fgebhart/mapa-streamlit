@@ -1,7 +1,6 @@
 import datetime
 import logging
 import os
-import sys
 from typing import List
 
 import folium
@@ -30,8 +29,6 @@ from mapa_streamlit.settings import (
 from mapa_streamlit.verification import selected_bbox_in_boundary, selected_bbox_too_large
 
 log = logging.getLogger(__name__)
-handler = logging.StreamHandler(sys.stdout)
-log.addHandler(handler)
 log.setLevel(os.getenv("MAPA_STREAMLIT_LOG_LEVEL", "DEBUG"))
 
 
@@ -78,8 +75,11 @@ def _compute_stl(geometry: dict, progress_bar: st.progress) -> None:
     st.sidebar.success("Successfully computed STL file!")
 
 
-def _check_area_and_compute_stl(folium_output: dict, progress_bar: st.progress) -> None:
-    geometry = folium_output["last_active_drawing"]["geometry"]
+def _check_area_and_compute_stl(folium_output: dict, geo_hash: str, progress_bar: st.progress) -> None:
+    all_drawings_dict = {
+        get_hash_of_geojson(draw["geometry"]): draw["geometry"] for draw in folium_output["all_drawings"]
+    }
+    geometry = all_drawings_dict[geo_hash]
     if selected_bbox_too_large(geometry, threshold=MAX_ALLOWED_AREA_SIZE):
         st.sidebar.warning(
             "Selected region is too large, fetching data for this area would consume too many resources. "
@@ -101,6 +101,26 @@ def _download_btn(data: str, disabled: bool) -> None:
         file_name=f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_mapa-streamlit.stl',
         disabled=disabled,
     )
+
+
+def _get_active_drawing_hash(state: st.AutoSessionState, drawings: List[str]) -> str:
+    # update state initially
+    if "drawings" not in state:
+        state.drawings = []
+    if "active_drawing" not in state:
+        state.active_drawing = None
+
+    old_drawings = state.drawings
+    for d in drawings:
+        if d not in old_drawings:
+            active_drawing = d
+            state.drawings = drawings
+            state.active_drawing = active_drawing
+            log.debug(f"🎨  found new active_drawing: {active_drawing}")
+            return active_drawing
+    else:
+        log.debug(f"💾  no new drawing found, returning last active drawing from state: {state.active_drawing}")
+        return state.active_drawing
 
 
 if __name__ == "__main__":
@@ -125,9 +145,10 @@ if __name__ == "__main__":
 
     geo_hash = None
     if output:
-        if output["last_active_drawing"] is not None:
-            geometry = output["last_active_drawing"]["geometry"]
-            geo_hash = get_hash_of_geojson(geometry)
+        if output["all_drawings"] is not None:
+            # get latest modified drawing
+            all_drawings = [get_hash_of_geojson(draw["geometry"]) for draw in output["all_drawings"]]
+            geo_hash = _get_active_drawing_hash(state=st.session_state, drawings=all_drawings)
 
     # ensure progress bar resides at top of sidebar and is invisible initially
     progress_bar = st.sidebar.progress(0)
@@ -149,7 +170,7 @@ if __name__ == "__main__":
             BTN_LABEL_CREATE_STL,
             key="create_stl",
             on_click=_check_area_and_compute_stl,
-            kwargs={"folium_output": output, "progress_bar": progress_bar},
+            kwargs={"folium_output": output, "geo_hash": geo_hash, "progress_bar": progress_bar},
             disabled=False if geo_hash else True,
         )
         st.markdown(
@@ -160,14 +181,14 @@ if __name__ == "__main__":
             unsafe_allow_html=True,
         )
 
-    stl_path = TMPDIR() / f"{geo_hash}.stl"
-    if stl_path.is_file():
-        with open(stl_path, "rb") as fp:
-            _download_btn(fp, False)
-    else:
-        _download_btn(b"None", True)
+        stl_path = TMPDIR() / f"{geo_hash}.stl"
+        if stl_path.is_file():
+            with open(stl_path, "rb") as fp:
+                _download_btn(fp, False)
+        else:
+            _download_btn(b"None", True)
 
-    st.sidebar.markdown("---")
+        st.sidebar.markdown("---")
 
     # Customization container
     with st.sidebar.container():
