@@ -1,4 +1,5 @@
 from importlib.metadata import version
+from typing import Tuple
 
 from mapa_streamlit import __version__
 
@@ -34,6 +35,7 @@ DEFAULT_Z_OFFSET = 2
 DEFAULT_Z_SCALE = 2.0
 SQUARED_SIDE_RATIO = 1.0
 DEFAULT_MODEL_SIZE = 100
+DEFAULT_TILING_FORMAT = "1x1"
 
 
 class ZOffsetSlider:
@@ -71,4 +73,14 @@ class SquaredCheckbox:
         "Enable this to force the computed output STL file to be squared in x and y dimensions. Note, that the "
         "rectangle you selected will be cut to achieve this. This option might be helpful, as drawing a perfect "
         "square by hand is impossible and because the visual map is projected."
+    )
+
+
+class TilingSelect:
+    label: str = "Split output STL file in multiple tiles?"
+    options: Tuple[str] = (DEFAULT_TILING_FORMAT, "1x2", "2x1", "2x2", "2x3", "3x2", "3x3")
+    help: str = (
+        "Select shape and number of tiles you want the generated output to be spilt into. This is helpful when "
+        "aiming for a print larger than the printer area. The first number splits the north-south axis and the "
+        "second number splits the west-east axis."
     )

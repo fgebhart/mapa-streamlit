@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mapa-streamlit"
-version = "0.6.2"
+version = "0.7.0"
 description = "Streamlit web app 🎈 for creating 3D-printable models of the earth 🌍 surface based on mapa"
 authors = ["Fabian Gebhart"]
 classifiers = [
@@ -15,7 +15,7 @@ classifiers = [
 python = ">=3.8,<3.11"
 streamlit = "^1.7.0"
 streamlit-folium = "^0.6.5"
-mapa = "0.8.0"
+mapa = "^0.9.0"
 tomli = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
