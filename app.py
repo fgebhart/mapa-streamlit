@@ -16,6 +16,7 @@ from mapa_streamlit.settings import (
     ABOUT,
     BTN_LABEL_CREATE_STL,
     BTN_LABEL_DOWNLOAD_STL,
+    DEFAULT_TILING_FORMAT,
     DISK_CLEANING_THRESHOLD,
     MAP_CENTER,
     MAP_ZOOM,
@@ -23,6 +24,7 @@ from mapa_streamlit.settings import (
     SQUARED_SIDE_RATIO,
     ModelSizeSlider,
     SquaredCheckbox,
+    TilingSelect,
     ZOffsetSlider,
     ZScaleSlider,
 )
@@ -60,7 +62,7 @@ def _compute_stl(geometry: dict, progress_bar: st.progress) -> None:
     geo_hash = get_hash_of_geojson(geometry)
     mapa_cache_dir = TMPDIR()
     run_cleanup_job(path=mapa_cache_dir, disk_cleaning_threshold=DISK_CLEANING_THRESHOLD)
-    path = mapa_cache_dir / f"{geo_hash}.stl"
+    path = mapa_cache_dir / geo_hash
     progress_bar.progress(0)
     convert_bbox_to_stl(
         bbox_geometry=geometry,
@@ -70,6 +72,7 @@ def _compute_stl(geometry: dict, progress_bar: st.progress) -> None:
         cut_to_format_ratio=SQUARED_SIDE_RATIO if ensure_squared else None,
         output_file=path,
         progress_bar=progress_bar,
+        split_area_in_tiles=DEFAULT_TILING_FORMAT if tiling_option is None else tiling_option,
     )
     # it is important to spawn this success message in the sidebar, because state will get lost otherwise
     st.sidebar.success("Successfully computed STL file!")
@@ -98,7 +101,7 @@ def _download_btn(data: str, disabled: bool) -> None:
     st.sidebar.download_button(
         label=BTN_LABEL_DOWNLOAD_STL,
         data=data,
-        file_name=f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_mapa-streamlit.stl',
+        file_name=f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_mapa-streamlit.zip',
         disabled=disabled,
     )
 
@@ -181,9 +184,9 @@ if __name__ == "__main__":
             unsafe_allow_html=True,
         )
 
-        stl_path = TMPDIR() / f"{geo_hash}.stl"
-        if stl_path.is_file():
-            with open(stl_path, "rb") as fp:
+        output_file = TMPDIR() / f"{geo_hash}.zip"
+        if output_file.is_file():
+            with open(output_file, "rb") as fp:
                 _download_btn(fp, False)
         else:
             _download_btn(b"None", True)
@@ -195,7 +198,7 @@ if __name__ == "__main__":
         st.write(
             """
             # Customization
-            Use below options to customize the output STL file:
+            Use below options to customize the output:
             """
         )
         z_offset = st.slider(
@@ -224,4 +227,9 @@ if __name__ == "__main__":
         ensure_squared = st.checkbox(
             label=SquaredCheckbox.label,
             help=SquaredCheckbox.help,
+        )
+        tiling_option = st.selectbox(
+            label=TilingSelect.label,
+            options=TilingSelect.options,
+            help=TilingSelect.help,
         )
