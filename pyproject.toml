@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mapa-streamlit"
-version = "0.7.0"
+version = "0.7.1"
 description = "Streamlit web app 🎈 for creating 3D-printable models of the earth 🌍 surface based on mapa"
 authors = ["Fabian Gebhart"]
 classifiers = [

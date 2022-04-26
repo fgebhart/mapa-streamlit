@@ -1,8 +1,9 @@
 import logging
 import shutil
-import psutil
 from pathlib import Path
 from typing import Union
+
+import psutil
 
 log = logging.getLogger(__name__)
 
@@ -73,6 +74,7 @@ def run_cleanup_job(path: Path, disk_cleaning_threshold: float) -> None:
     if disk_usage > disk_cleaning_threshold:
         log.info(f"🧹  Disk usage exceeds threshold ({disk_usage}%>{disk_cleaning_threshold}%), deleting files ...")
         _delete_files_in_dir(path, ".stl")
+        _delete_files_in_dir(path, ".zip")
         _delete_files_in_dir(path, ".tiff", name_prefix="merged_")
         _delete_files_in_dir(path, ".tiff", name_prefix="clipped_")
     else:
