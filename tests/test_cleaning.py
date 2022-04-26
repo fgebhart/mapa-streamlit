@@ -100,10 +100,14 @@ def test_run_cleanup_job(tmp_path) -> None:
     tiff = tmp_path / "baa.tiff"
     tiff.write_text("foo")
     assert tiff.is_file()
+    zip = tmp_path / "baz.zip"
+    zip.write_text("foo")
+    assert zip.is_file()
 
     run_cleanup_job(tmp_path, disk_cleaning_threshold=0.0)
     assert not stl.is_file()
     assert tiff.is_file()
+    assert not zip.is_file()
 
     # chose very high threshold to check that files won't get deleted
     stl = tmp_path / "baa.stl"
