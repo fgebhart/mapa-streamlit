@@ -1,9 +1,9 @@
 # mapa-streamlit 🌍
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/fgebhart/mapa-streamlit/main/app.py)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://3dmaps.streamlitapp.com)
 [![Python Tests](https://github.com/fgebhart/mapa-streamlit/actions/workflows/test.yml/badge.svg)](https://github.com/fgebhart/mapa-streamlit/actions/workflows/test.yml)
 
-A [streamlit web app](https://share.streamlit.io/fgebhart/mapa-streamlit/main/app.py) which let's you create 3D-printable
+A [streamlit web app](https://3dmaps.streamlitapp.com) which let's you create 3D-printable
 STL files using satellite elevation data ([ALOS DEM](https://planetarycomputer.microsoft.com/dataset/alos-dem)) based on
 [mapa](https://github.com/fgebhart/mapa).
 
