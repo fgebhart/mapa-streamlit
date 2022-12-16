@@ -106,7 +106,7 @@ def _download_btn(data: str, disabled: bool) -> None:
     )
 
 
-def _get_active_drawing_hash(state: st.AutoSessionState, drawings: List[str]) -> str:
+def _get_active_drawing_hash(state, drawings: List[str]) -> str:
     # update state initially
     if "drawings" not in state:
         state.drawings = []
