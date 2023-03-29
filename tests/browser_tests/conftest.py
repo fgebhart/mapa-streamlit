@@ -10,7 +10,7 @@ from selenium.webdriver import Chrome, ChromeOptions
 @pytest.fixture
 def webdriver():
     options = ChromeOptions()
-    options.headless = True
+    options.add_argument("--headless")
     driver = Chrome(options=options)
     driver.set_window_size(1280, 1024)
     yield driver

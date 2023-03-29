@@ -74,7 +74,7 @@ def test_streamlit_app__basic(live_server, webdriver) -> None:
     actions = ActionChains(webdriver)
     actions.move_to_element(element).perform()
 
-    about_xpath = "/html/body/div/div[2]/div/div/div[3]/div/div/ul[1]/ul[6]/li/span"
+    about_xpath = "/html/body/div/div[2]/div/div/div[2]/div/div/ul[1]/ul[5]/li"
     WebDriverWait(webdriver, DELAY).until(EC.element_to_be_clickable((By.TAG_NAME, "span")))
     WebDriverWait(webdriver, DELAY).until(EC.presence_of_element_located((By.XPATH, about_xpath)))
     WebDriverWait(webdriver, DELAY, ignored_exceptions=IGNORED_EXCEPTIONS).until(
