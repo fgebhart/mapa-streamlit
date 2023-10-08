@@ -27,9 +27,10 @@ def test_streamlit_app__basic(live_server, webdriver) -> None:
     assert "mapa   🌍   Map to STL Converter" in h1
 
     li = [e.text for e in webdriver.find_elements(By.TAG_NAME, "li")]
+    assert "Zoom to your region of interest" in li
     assert "Click the black square on the map" in li
     assert "Draw a rectangle on the map" in li
-    assert "Optional: Apply customizations" in li
+    assert "Optional: Apply customizations below" in li
     assert "Click on Create STL" in li
     assert "Wait for the computation to finish" in li
     assert "Click on Download STL" in li
