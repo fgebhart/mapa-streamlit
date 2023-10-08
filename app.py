@@ -161,10 +161,11 @@ if __name__ == "__main__":
         st.markdown(
             f"""
             # Getting Started
-            1. Click the black square on the map
-            2. Draw a rectangle on the map
-            3. Optional: Apply customizations
-            4. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
+            1. Zoom to your region of interest
+            2. Click the black square on the map
+            3. Draw a rectangle on the map
+            4. Optional: Apply customizations below
+            5. Click on <kbd>{BTN_LABEL_CREATE_STL}</kbd>
             """,
             unsafe_allow_html=True,
         )
