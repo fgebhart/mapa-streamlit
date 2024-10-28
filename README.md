@@ -22,26 +22,26 @@ Contributions are welcome! In case you would like to contribute to the
 
 For setting up the development environment, clone this repo
 
-```
+```shell
 git clone git@github.com:fgebhart/mapa-streamlit.git && cd mapa-streamlit
 ```
 
 and run the following commands to install the requirements (in case you don't have poetry install, you can do so with
 `pip install poetry`):
 
-```
+```shell
 poetry install
 poetry shell
 ```
 
 To run the tests, run:
 
-```
+```shell
 pytest tests/
 ```
 
 To run the streamlit app, run:
 
-```
+```shell
 streamlit run app.py
 ```
